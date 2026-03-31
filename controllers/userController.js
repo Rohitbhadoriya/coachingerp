@@ -82,5 +82,24 @@ exports.updateUser = async(req,res)=>{
         res.status(500).json({message: error.message})  
     }
 }
+// Delete User by Admin
+exports.deleteUser = async(req,res)=>{
+    try {
+        const user = await User.findByIdAndDelete(req.params.id).select('-password')
+        if(!user){
+            return res.status(404).json({message:'User Not Found'})
+        }
+        res.json({
+            message:"User Deleted SucessFully",
+            user
+        })
+    } catch (error) {
+        res.status(500).json({message: error.message})  
+    }
+}
+
+
+
+// Deactivate User by Admin
 
 
