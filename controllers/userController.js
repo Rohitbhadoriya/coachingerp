@@ -7,6 +7,11 @@ exports.getAllUsers = async (req, res)=>{
         if(role){
             query.role = role
         }
+        // yha ye kya work kr rha h bato qyery.role = agr esa h to wo kya krge aapko qery me role add krna hoga agr role query me h to 
+        // ab y query kya h kya query ki jgh hun or kuch use kr skte ho kya h but isme ek problem h ki hume phir 
+        // ese krna pass krna higa  const {teacher} = req.teacher ese krna se kya hoga esa krne se aap sirf teacher ko he filer kr pangey smj gaye aap 
+        // 
+
         const users = await User.find(query)
         .select('-password')
         .sort({createdAt: -1})
@@ -101,5 +106,70 @@ exports.deleteUser = async(req,res)=>{
 
 
 // Deactivate User by Admin
+exports.deactiVateUser = async(req,res)=>{
+    try {
+        const user = await User.findByIdAndUpdate(req.params.id,{
+            active:false
+        },{new:true}).select('-password')
+        if(!user){
+            return res.status(404).json({message:'User Not Found'})
+        }
+        res.json({
+            message:"User Deactivated SucessFully",
+            user
+        })
+    } catch (error) {
+        res.status(500).json({message: error.message})  
+    }
+}
+
+// Activated by Admin
+exports.activeUser = async(req,res)=>{
+    try {
+        const user = await User.findByIdAndUpdate(req.params.id,{
+            active:true
+        },{new:true}).select('-password')
+        if(!user){
+            return res.status(404).json({message:'User Not Found'})
+        }
+        res.json({
+            message:"User Activated SucessFully",
+            user
+        })
+    } catch (error) {
+        res.status(500).json({message: error.message})  
+    }
+} 
+
+// multiple user Add krna ho by admin 
+
+exports.addMultipleUsers = async(req,res)=>{
+    try {
+        const {users} = req.body
+        const createdUsers = await User.insertMany(users)
+        res.json({
+            message:"Users Created SucessFully",
+            users: createdUsers
+        })
+    } catch (error) {
+        res.status(500).json({message: error.message})  
+    }
+}
 
 
+// jese ki maan lo kisi lecturted approved krna 
+
+// exports.approvedLectures = async(req,res)=>{
+//     try {
+//         const {lecturesId} = req.body
+//         const lectures = await lectures.findByIdAndUpdate(lecturesId,{
+//             approved:true
+//         },{new:true})
+//         res.json({
+//             message:"Lecture Approved SucessFully",
+//             lectures
+//         })
+//     } catch (error) {
+//         res.status(500).json({message: error.message})  
+//     }
+// }

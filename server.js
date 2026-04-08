@@ -14,12 +14,18 @@ connectDB()
 
 // 
 app.use(helmet())
-app.use(cors())
+// app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(morgan('dev'))
+// 
+// cors
 
-// test
+app.use(cors({
+  origin: '*',           // development ke liye (production mein specific origin daalna)
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.get('/',(req, res)=>{
     res.send('All is working ')
 })
