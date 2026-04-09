@@ -215,9 +215,9 @@
 
 
 
-
-const Batch = require('../models/Batch');
 const User = require('../models/User');
+const Batch = require('../models/Batch');
+
 
 // ====================== BATCH CRUD OPERATIONS ======================
 
@@ -260,6 +260,48 @@ exports.createBatch = async (req, res) => {
 };
 
 // 2. Get All Batches (with pagination and search)
+// exports.getAllBatches = async (req, res) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 10;
+//     const skip = (page - 1) * limit;
+
+//     let query = {};
+
+//     if (req.query.status) query.status = req.query.status;
+//     if (req.query.course) query.course = req.query.course;
+//     if (req.query.search) {
+//       query.$or = [
+//         { batchName: { $regex: req.query.search, $options: 'i' } },
+//         { batchCode: { $regex: req.query.search, $options: 'i' } }
+//       ];
+//     }
+
+//     const batches = await Batch.find(query)
+//       .populate('teacher', 'name email')
+//       .populate('students', 'name email')
+//       .sort({ startDate: -1 })
+//       .skip(skip)
+//       .limit(limit);
+
+//     const total = await Batch.countDocuments(query);
+
+//     res.json({
+//       success: true,
+//       batches,
+//       pagination: {
+//         currentPage: page,
+//         totalPages: Math.ceil(total / limit),
+//         totalBatches: total
+//       }
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+
+// 2. Get All Batches (Safe for Admin + Teacher)
 exports.getAllBatches = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -267,6 +309,12 @@ exports.getAllBatches = async (req, res) => {
     const skip = (page - 1) * limit;
 
     let query = {};
+
+    // Teacher sirf apne batches dekh sake (optional but recommended)
+    if (req.user.role === 'teacher') {
+      query.teacher = req.user.id;
+    }
+    // Admin sab dekh sakta hai (query empty rahega)
 
     if (req.query.status) query.status = req.query.status;
     if (req.query.course) query.course = req.query.course;
@@ -277,9 +325,16 @@ exports.getAllBatches = async (req, res) => {
       ];
     }
 
+    // ✅ Safe Populate (Yeh 500 error solve karega)
     const batches = await Batch.find(query)
-      .populate('teacher', 'name email')
-      .populate('students', 'name email')
+      // .populate({
+      //   path: 'teacher',
+      //   select: 'name email',
+      // })
+      // .populate({
+      //   path: 'students',
+      //   select: 'name email'
+      // })
       .sort({ startDate: -1 })
       .skip(skip)
       .limit(limit);
@@ -288,7 +343,7 @@ exports.getAllBatches = async (req, res) => {
 
     res.json({
       success: true,
-      batches,
+      batches: batches || [],
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(total / limit),
@@ -296,7 +351,11 @@ exports.getAllBatches = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("=== Get All Batches ERROR ===", error.stack || error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Failed to load batches' 
+    });
   }
 };
 
