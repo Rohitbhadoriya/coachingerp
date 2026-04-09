@@ -222,8 +222,54 @@ const Batch = require('../models/Batch');
 // ====================== BATCH CRUD OPERATIONS ======================
 
 // 1. Create New Batch
+// exports.createBatch = async (req, res) => {
+//   try {
+//     const { batchName, course, courseType, startDate, endDate, description, maxStudents, fees } = req.body;
+
+//     // Check if batch with same name already exists
+//     const existingBatch = await Batch.findOne({ batchName });
+//     if (existingBatch) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Is naam ka batch already exist karta hai"
+//       });
+//     }
+
+//     const newBatch = new Batch({
+//       batchName,
+//       course,
+//       courseType,
+//       startDate: new Date(startDate),
+//       endDate: endDate ? new Date(endDate) : null,
+//       teacher: req.user.id,           // Logged in user (Admin) teacher banega
+//       description,
+//       maxStudents: maxStudents || 50,
+//       fees: fees || { amount: 0 }
+//     });
+
+//     await newBatch.save();
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Batch successfully created!",
+//       batch: newBatch
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// 1. Create New Batch
 exports.createBatch = async (req, res) => {
   try {
+    // ←←← Yeh safety check zaroori hai
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Not Authorized - Please login again"
+      });
+    }
+
     const { batchName, course, courseType, startDate, endDate, description, maxStudents, fees } = req.body;
 
     // Check if batch with same name already exists
@@ -241,7 +287,7 @@ exports.createBatch = async (req, res) => {
       courseType,
       startDate: new Date(startDate),
       endDate: endDate ? new Date(endDate) : null,
-      teacher: req.user.id,           // Logged in user (Admin) teacher banega
+      teacher: req.user.id,        // Ab safe hai
       description,
       maxStudents: maxStudents || 50,
       fees: fees || { amount: 0 }
@@ -255,7 +301,11 @@ exports.createBatch = async (req, res) => {
       batch: newBatch
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("=== Create Batch ERROR ===", error.stack || error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Failed to create batch' 
+    });
   }
 };
 
