@@ -143,18 +143,18 @@ exports.activeUser = async(req,res)=>{
 
 // multiple user Add krna ho by admin 
 
-exports.addMultipleUsers = async(req,res)=>{
-    try {
-        const {users} = req.body
-        const createdUsers = await User.insertMany(users)
-        res.json({
-            message:"Users Created SucessFully",
-            users: createdUsers
-        })
-    } catch (error) {
-        res.status(500).json({message: error.message})  
-    }
-}
+// exports.addMultipleUsers = async(req,res)=>{
+//     try {
+//         const {users} = req.body
+//         const createdUsers = await User.insertMany(users)
+//         res.json({
+//             message:"Users Created SucessFully",
+//             users: createdUsers
+//         })
+//     } catch (error) {
+//         res.status(500).json({message: error.message})  
+//     }
+// }
 
 
 // jese ki maan lo kisi lecturted approved krna 

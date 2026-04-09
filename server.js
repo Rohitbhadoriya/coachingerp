@@ -7,6 +7,7 @@ const morgan = require('morgan')
 const connectDB = require('./config/db')
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
+const batchRoutes = require('./routes/batchRoutes')
 // ENV Load krne ke liye hum .env file ko load kr lenge 
 dotenv.config()
 connectDB()
@@ -32,6 +33,7 @@ app.get('/',(req, res)=>{
 
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/batches',batchRoutes)
 
 const PORT  = process.env.PORT || 5000
 app.listen(PORT, () => {
